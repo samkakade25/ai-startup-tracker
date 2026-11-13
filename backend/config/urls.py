@@ -1,22 +1,18 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
 from django.http import JsonResponse
+from django.urls import include, path
+
+from rest_framework.routers import DefaultRouter
+
+from apps.careers.views import JobOpeningViewSet
+from apps.funding.views import (
+    FundingInvestorViewSet,
+    FundingRoundViewSet,
+)
+from apps.investors.views import InvestorViewSet
+from apps.sources.views import SourceArticleViewSet
+from apps.startups.views import StartupViewSet
+
 
 def health_check(request):
     return JsonResponse({
@@ -24,7 +20,56 @@ def health_check(request):
         "service": "ai-startup-tracker-api",
     })
 
+
+router = DefaultRouter()
+
+router.register(
+    "startups",
+    StartupViewSet,
+    basename="startup",
+)
+
+router.register(
+    "investors",
+    InvestorViewSet,
+    basename="investor",
+)
+
+router.register(
+    "funding-rounds",
+    FundingRoundViewSet,
+    basename="funding-round",
+)
+
+router.register(
+    "funding-investors",
+    FundingInvestorViewSet,
+    basename="funding-investor",
+)
+
+router.register(
+    "source-articles",
+    SourceArticleViewSet,
+    basename="source-article",
+)
+
+router.register(
+    "job-openings",
+    JobOpeningViewSet,
+    basename="job-opening",
+)
+
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("api/v1/health/", health_check),
+    path("admin/", admin.site.urls),
+
+    path(
+        "api/v1/health/",
+        health_check,
+    ),
+
+    path(
+        "api/v1/",
+        include(router.urls),
+    ),
 ]
